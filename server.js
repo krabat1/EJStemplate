@@ -1,7 +1,7 @@
 import http from 'node:http';
 import ejs from 'ejs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { URLPattern, fileURLToPath } from 'node:url';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -16,9 +16,26 @@ const render = async (templateName, data = {}) => {
 
 const server = http.createServer( async (req,res) => {
     try{
-        const html = await render('layout.ejs', { test: '<p>bodyTest</p>'  });
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(html);
+
+        const routes = [
+            { pattern: new URLPattern({ pathname: '/'}), handler: handlerHome }
+        ]
+
+        routes.some(route => {
+            const match = route.pattern.exec(req.url);
+            if (match) {
+                route.handler(match);
+                return true;
+            }
+            return false;
+        });
+
+        async function handlerHome(match) {
+            const html = await render('layout.ejs', {});
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(html);
+        }
+
     }catch(err){
         res.writeHead(500);
         res.end('Error: ' + err.message);
