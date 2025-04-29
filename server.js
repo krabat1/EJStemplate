@@ -16,7 +16,7 @@ const render = async (templateName, data = {}) => {
 
 const server = http.createServer( async (req,res) => {
     try{
-        const html = await render('layout.ejs', { test: '<p>test</p>'  });
+        const html = await render('layout.ejs', { test: '<p>bodyTest</p>'  });
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(html);
     }catch(err){
