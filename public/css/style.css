@@ -32,5 +32,25 @@ body > div:nth-child(2) > div:last-child{
 }
 
 body > div:nth-child(2) > div:nth-child(2){
+    display: flex;
+    flex-direction: row;
     flex-grow: 1;
+}
+
+body > div:nth-child(2) > div:nth-child(2) > div:first-child,
+body > div:nth-child(2) > div:nth-child(2) > div:last-child{
+    background-color: lightpink;
+    padding: .5rem;
+
+}
+body > div:nth-child(2) > div:nth-child(2) > div:first-child{
+    width:15rem;
+}
+body > div:nth-child(2) > div:nth-child(2) > div:last-child{
+    width:5rem;
+}
+
+body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2){
+    flex-grow: 1;
+    padding: .5rem;
 }
