@@ -27,13 +27,15 @@ const mimeTypes = {
 const routes = [
     { pattern: new URLPattern({ pathname: '/'}), handler: handlerHome }
 ]
-const viewModel = {
-    displayRules: {
+function createBaseViewModel() {
+    return {
+        displayRules: {
         c1: [false, false],   // first.ejs & third.ejs not include
         c2: [false, false], // alpha.ejs & gamma.ejs not include
         c3: [false, false],   // primo.ejs & tertio.ejs not include
         // the content (second.ejs -> beta.ejs -> secundo.ejs always included)
-    }
+        }
+    };
 }
 
 const server = http.createServer( async (req,res) => {
@@ -64,13 +66,13 @@ const server = http.createServer( async (req,res) => {
 })
 
 async function handlerHome(req, res, match) {
-    const currentViewModel = viewModel
-    currentViewModel.displayRules = {
+    const viewModel = createBaseViewModel();
+    viewModel.displayRules = {
         c1: [true, false],   
         c2: [true, true], 
         c3: [false, true],   
     }
-    const html = await render('layout.ejs', { viewModel: currentViewModel } );
+    const html = await render('layout.ejs', { viewModel: viewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
 }
