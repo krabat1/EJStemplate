@@ -34,6 +34,13 @@ function createBaseViewModel() {
         c2: [false, false], // alpha.ejs & gamma.ejs not include
         c3: [false, false],   // primo.ejs & tertio.ejs not include
         // the content (second.ejs -> beta.ejs -> secundo.ejs always included)
+        c11_content: null,
+        c13_content: null,
+        c21_content: null,
+        c23_content: null,
+        c31_content: null,
+        c32_content: null,
+        c33_content: null,
         }
     };
 }
@@ -70,7 +77,13 @@ async function handlerHome(req, res, match) {
     viewModel.displayRules = {
         c1: [true, false],   
         c2: [true, true], 
-        c3: [false, true],   
+        c3: [false, true],
+        // used partials: c11,c21,c23,c33,c32 (c32 always)
+        c11_content: `<p>c11_content from viewModel</p>`,
+        c21_content: '<p>c21_content from viewModel</p>',
+        c23_content: '<p>c23_content from viewModel</p>',
+        c33_content: '<p>c33_content from viewModel</p>',
+        c32_content: '<p>c32_content from viewModel</p>', 
     }
     const html = await render('layout.ejs', { viewModel: viewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });
