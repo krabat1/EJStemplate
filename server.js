@@ -4,7 +4,6 @@ import path from 'node:path';
 import { URLPattern, fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -28,6 +27,14 @@ const mimeTypes = {
 const routes = [
     { pattern: new URLPattern({ pathname: '/'}), handler: handlerHome }
 ]
+const viewModel = {
+    displayRules: {
+        body: [false, false],   // first.ejs & third.ejs not include
+        second: [false, false], // alpha.ejs & gamma.ejs not include
+        beta: [false, false],   // primo.ejs & tertio.ejs not include
+        // the content (second.ejs -> beta.ejs -> secundo.ejs always included)
+    }
+}
 
 const server = http.createServer( async (req,res) => {
     try{
@@ -57,7 +64,13 @@ const server = http.createServer( async (req,res) => {
 })
 
 async function handlerHome(req, res, match) {
-    const html = await render('layout.ejs', {});
+    const currentViewModel = viewModel
+    currentViewModel.displayRules = {
+        body: [true, false],   
+        second: [true, true], 
+        beta: [false, true],   
+    }
+    const html = await render('layout.ejs', { viewModel: currentViewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
 }

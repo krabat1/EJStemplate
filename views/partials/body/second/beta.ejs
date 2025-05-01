@@ -1,6 +1,11 @@
+<div class="beta">
+    <% if (viewModel.displayRules.beta[0]) { %>
+        <%- include('beta/primo') %>
+    <% } %>
 
-<div>
-    <%- include('beta/primo') %>
     <%- include('beta/secundo') %>
-    <%- include('beta/tertio') %>
+
+    <% if (viewModel.displayRules.beta[1]) { %>
+        <%- include('beta/tertio') %>
+    <% } %>
 </div>

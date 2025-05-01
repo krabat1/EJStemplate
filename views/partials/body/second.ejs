@@ -1,5 +1,11 @@
-<div>
-    <%- include('second/alpha') %>
+<div class="second">
+    <% if (viewModel.displayRules.second[0]) { %>
+        <%- include('second/alpha') %>
+    <% } %>
+
     <%- include('second/beta') %>
-    <%- include('second/gamma') %>
+
+    <% if (viewModel.displayRules.second[1]) { %>
+        <%- include('second/gamma') %>
+    <% } %>
 </div>

@@ -7,50 +7,51 @@ body{
     display: flex;
     flex-direction: row;
     min-height: 100vh;
+    min-width: 100vw;
 }
-body > div:first-child{
+body > .first{
     width:5rem;
 }
-body > div:first-child,
-body > div:last-child{
+body > .first,
+body > .third{
     background-color: lightblue;
-    padding: .5rem;
+    padding: .4rem;
 }
-body > div:last-child{
+body > .third{
     width:15rem;
 }
-body > div:nth-child(2){
+body > .second {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     flex-grow: 1;
 }
-body > div:nth-child(2) > div:first-child,
-body > div:nth-child(2) > div:last-child{
+body > .second > .alpha,
+body > .second > .gamma{
     background-color: lightsalmon;
     padding: .5rem;
 }
 
-body > div:nth-child(2) > div:nth-child(2){
+body > .second > .beta{
     display: flex;
     flex-direction: row;
     flex-grow: 1;
 }
 
-body > div:nth-child(2) > div:nth-child(2) > div:first-child,
-body > div:nth-child(2) > div:nth-child(2) > div:last-child{
+body > .second > .beta > .primo,
+body > .second > .beta > .tertio{
     background-color: lightpink;
     padding: .5rem;
 
 }
-body > div:nth-child(2) > div:nth-child(2) > div:first-child{
+body > .second > .beta > .primo{
     width:15rem;
 }
-body > div:nth-child(2) > div:nth-child(2) > div:last-child{
-    width:5rem;
+body > .second > .beta > .tertio{
+    width:15rem;
 }
 
-body > div:nth-child(2) > div:nth-child(2) > div:nth-child(2){
+body > .second > .beta > .secundo{
     flex-grow: 1;
     padding: .5rem;
 }

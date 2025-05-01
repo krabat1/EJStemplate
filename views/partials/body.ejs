@@ -1,3 +1,9 @@
-<%- include('body/first') %>
+<% if (viewModel.displayRules.body[0]) { %>
+    <%- include('body/first') %>
+<% } %>
+
 <%- include('body/second') %>
-<%- include('body/third') %>
+
+<% if (viewModel.displayRules.body[1]) { %>
+    <%- include('body/third') %>
+<% } %>
