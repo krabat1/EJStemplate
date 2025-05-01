@@ -29,9 +29,9 @@ const routes = [
 ]
 const viewModel = {
     displayRules: {
-        body: [false, false],   // first.ejs & third.ejs not include
-        second: [false, false], // alpha.ejs & gamma.ejs not include
-        beta: [false, false],   // primo.ejs & tertio.ejs not include
+        c1: [false, false],   // first.ejs & third.ejs not include
+        c2: [false, false], // alpha.ejs & gamma.ejs not include
+        c3: [false, false],   // primo.ejs & tertio.ejs not include
         // the content (second.ejs -> beta.ejs -> secundo.ejs always included)
     }
 }
@@ -66,9 +66,9 @@ const server = http.createServer( async (req,res) => {
 async function handlerHome(req, res, match) {
     const currentViewModel = viewModel
     currentViewModel.displayRules = {
-        body: [true, false],   
-        second: [true, true], 
-        beta: [false, true],   
+        c1: [true, false],   
+        c2: [true, true], 
+        c3: [false, true],   
     }
     const html = await render('layout.ejs', { viewModel: currentViewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });

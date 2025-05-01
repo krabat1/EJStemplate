@@ -9,49 +9,49 @@ body{
     min-height: 100vh;
     min-width: 100vw;
 }
-body > .first{
+body > .c11{
     width:5rem;
 }
-body > .first,
-body > .third{
+body > .c11,
+body > .c13{
     background-color: lightblue;
     padding: .4rem;
 }
-body > .third{
+body > .c13{
     width:15rem;
 }
-body > .second {
+body > .c12 {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     flex-grow: 1;
 }
-body > .second > .alpha,
-body > .second > .gamma{
+body > .c12 > .c21,
+body > .c12 > .c23{
     background-color: lightsalmon;
     padding: .5rem;
 }
 
-body > .second > .beta{
+body > .c12 > .c22{
     display: flex;
     flex-direction: row;
     flex-grow: 1;
 }
 
-body > .second > .beta > .primo,
-body > .second > .beta > .tertio{
+body > .c12 > .c22 > .c31,
+body > .c12 > .c22 > .c33{
     background-color: lightpink;
     padding: .5rem;
 
 }
-body > .second > .beta > .primo{
+body > .c12 > .c22 > .c31{
     width:15rem;
 }
-body > .second > .beta > .tertio{
+body > .c12 > .c22 > .c33{
     width:15rem;
 }
 
-body > .second > .beta > .secundo{
+body > .c12 > .c22 > .c32{
     flex-grow: 1;
     padding: .5rem;
 }
