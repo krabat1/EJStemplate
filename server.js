@@ -14,10 +14,8 @@ const render = async (templateName, data = {}) => {
 
     // When the html data is an array, join it.
     const keys = Object.keys(data.viewModel.displayRules)
-    //console.log(keys);
     keys.forEach((key) => {
         if(key.match(/^c(\d+)_content$/)){
-            console.log(key)
             if(Array.isArray(data.viewModel.displayRules.key)){
                 data.viewModel.displayRules.key = data.viewModel.displayRules.key.join('')
             }
@@ -54,6 +52,13 @@ function createBaseViewModel() {
         c31_content: null,
         c32_content: null,
         c33_content: null,
+        c11_style: null,
+        c13_style: null,
+        c21_style: null,
+        c23_style: null,
+        c31_style: null,
+        c32_style: null,
+        c33_style: null,
         }
     };
 }
