@@ -13,14 +13,20 @@ const render = async (templateName, data = {}) => {
     const content = await ejs.renderFile(filePath, data);
 
     // When the html data is an array, join it.
+    // The specified style urls, whether in an array or not, are passed as they are into the headCssLinks property, and we flatten this at the end of the process to get an array of strings.
     const keys = Object.keys(data.viewModel.displayRules)
     keys.forEach((key) => {
         if(key.match(/^c(\d+)_content$/)){
             if(Array.isArray(data.viewModel.displayRules.key)){
                 data.viewModel.displayRules.key = data.viewModel.displayRules.key.join('')
             }
+        }else if(key.match(/^c(\d+)_style$/)){
+            if(data.viewModel.displayRules.key !== null){
+                data.viewModel.displayRules.headCssLinks.push(data.viewModel.displayRules.key);
+            } 
         }
     })
+    data.viewModel.displayRules.headCssLinks.flat(Infinity);
 
     return await ejs.renderFile(layoutPath, { ...data, content });
 };
@@ -59,6 +65,7 @@ function createBaseViewModel() {
         c31_style: null,
         c32_style: null,
         c33_style: null,
+        headCssLinks: []
         }
     };
 }
