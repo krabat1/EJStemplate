@@ -11,6 +11,19 @@ const render = async (templateName, data = {}) => {
     const filePath = path.join(__dirname, 'views', templateName);
     const layoutPath = path.join(__dirname, 'views', 'layout.ejs');
     const content = await ejs.renderFile(filePath, data);
+
+    // When the html data is an array, join it.
+    const keys = Object.keys(data.viewModel.displayRules)
+    //console.log(keys);
+    keys.forEach((key) => {
+        if(key.match(/^c(\d+)_content$/)){
+            console.log(key)
+            if(Array.isArray(data.viewModel.displayRules.key)){
+                data.viewModel.displayRules.key = data.viewModel.displayRules.key.join('')
+            }
+        }
+    })
+
     return await ejs.renderFile(layoutPath, { ...data, content });
 };
 
@@ -79,7 +92,7 @@ async function handlerHome(req, res, match) {
         c2: [true, true], 
         c3: [false, true],
         // used partials: c11,c21,c23,c33,c32 (c32 always)
-        c11_content: `<p>c11_content from viewModel</p>`,
+        c11_content: '<p>c11_content from viewModel</p>',
         c21_content: '<p>c21_content from viewModel</p>',
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',
