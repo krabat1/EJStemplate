@@ -3,6 +3,8 @@ import ejs from 'ejs';
 import path from 'node:path';
 import { URLPattern, fileURLToPath } from 'node:url';
 import fs from 'node:fs';
+import 'dotenv/config'
+import './engineRoom/makeComponentCssToPublic.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -10,24 +12,30 @@ const __dirname = path.dirname(__filename);
 const render = async (templateName, data = {}) => {
     const filePath = path.join(__dirname, 'views', templateName);
     const layoutPath = path.join(__dirname, 'views', 'layout.ejs');
-    const content = await ejs.renderFile(filePath, data);
 
     // When the html data is an array, join it.
     // The specified style urls, whether in an array or not, are passed as they are into the headCssLinks property, and we flatten this at the end of the process to get an array of strings.
     const keys = Object.keys(data.viewModel.displayRules)
     keys.forEach((key) => {
         if(key.match(/^c(\d+)_content$/)){
-            if(Array.isArray(data.viewModel.displayRules.key)){
-                data.viewModel.displayRules.key = data.viewModel.displayRules.key.join('')
+            if(Array.isArray(data.viewModel.displayRules[key])){
+                data.viewModel.displayRules.key = data.viewModel.displayRules[key].join('')
             }
         }else if(key.match(/^c(\d+)_style$/)){
-            if(data.viewModel.displayRules.key !== null){
-                data.viewModel.displayRules.headCssLinks.push(data.viewModel.displayRules.key);
+            if(data.viewModel.displayRules[key] !== null){
+                data.viewModel.displayRules.headCssLinks.push(data.viewModel.displayRules[key]);
             } 
         }
     })
-    data.viewModel.displayRules.headCssLinks.flat(Infinity);
+    data.viewModel.displayRules.headCssLinks = data.viewModel.displayRules.headCssLinks.flat(Infinity);
+    // add timestamp to css url
+    const timeStamp = (new Date).getTime();
+    data.viewModel.displayRules.headCssLinks.forEach((link, index) => {
+        data.viewModel.displayRules.headCssLinks[index] = data.viewModel.displayRules.headCssLinks[index] + '?v=' + (timeStamp + index)
+    })
+    console.log('render headCssLinks',data.viewModel.displayRules.headCssLinks)
 
+    const content = await ejs.renderFile(filePath, data);
     return await ejs.renderFile(layoutPath, { ...data, content });
 };
 
@@ -47,10 +55,10 @@ const routes = [
 function createBaseViewModel() {
     return {
         displayRules: {
-        c1: [false, false],   // first.ejs & third.ejs not include
-        c2: [false, false], // alpha.ejs & gamma.ejs not include
-        c3: [false, false],   // primo.ejs & tertio.ejs not include
-        // the content (second.ejs -> beta.ejs -> secundo.ejs always included)
+        c1: [false, false],   
+        c2: [false, false], 
+        c3: [false, false],   
+        // the content (c12.ejs -> c22.ejs -> v32.ejs always included)
         c11_content: null,
         c13_content: null,
         c21_content: null,
@@ -72,8 +80,11 @@ function createBaseViewModel() {
 
 const server = http.createServer( async (req,res) => {
     try{
+        const url = new URL(req.url, 'http://localhost'); // fontos: base URL kell
+        const pathname = url.pathname; // ez csak az útvonalat adja: "/css/components/test.css"
+        const staticFilePath = path.join(__dirname, 'public', pathname);
+        //const staticFilePath = path.join(__dirname, 'public', req.url);
 
-        const staticFilePath = path.join(__dirname, 'public', req.url);
         if (fs.existsSync(staticFilePath) && fs.statSync(staticFilePath).isFile()) {
             const ext = path.extname(staticFilePath);
             res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
@@ -99,17 +110,18 @@ const server = http.createServer( async (req,res) => {
 
 async function handlerHome(req, res, match) {
     const viewModel = createBaseViewModel();
-    viewModel.displayRules = {
-        c1: [true, false],   
-        c2: [true, true], 
+    Object.assign(viewModel.displayRules, {
+        c1: [true, false],
+        c2: [true, true],
         c3: [false, true],
         // used partials: c11,c21,c23,c33,c32 (c32 always)
         c11_content: '<p>c11_content from viewModel</p>',
         c21_content: '<p>c21_content from viewModel</p>',
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',
-        c32_content: '<p>c32_content from viewModel</p>', 
-    }
+        c32_content: '<p>c32_content from viewModel</p>',
+        c11_style: 'css/components/test.css',
+    });
     const html = await render('layout.ejs', { viewModel: viewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.end(html);
