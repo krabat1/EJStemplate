@@ -1,3 +1,12 @@
-export async function getHtml() {
-    return '<p>This is HTML from a test component</p>';
+import ejs from 'ejs';
+import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+export async function getHtml(viewModel) {
+    const templatePath = join(__dirname, 'template.ejs');
+    const template = await readFile(templatePath, 'utf-8');
+    return ejs.render(template, { viewModel: viewModel });
 }

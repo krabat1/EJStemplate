@@ -34,7 +34,6 @@ const render = async (templateName, data = {}) => {
     data.viewModel.displayRules.headCssLinks.forEach((link, index) => {
         data.viewModel.displayRules.headCssLinks[index] = data.viewModel.displayRules.headCssLinks[index] + '?v=' + (timeStamp + index)
     })
-    console.log('render headCssLinks',data.viewModel.displayRules.headCssLinks)
 
     const content = await ejs.renderFile(filePath, data);
     return await ejs.renderFile(layoutPath, { ...data, content });
@@ -122,9 +121,10 @@ async function handlerHome(req, res, match) {
         c33_content: '<p>c33_content from viewModel</p>',
         c32_content: '<p>c32_content from viewModel</p>',
         c11_style: 'css/components/test.css',
+        testString: 'apple theft',
     });
 
-    await resolveDynamicContent(viewModel.displayRules);
+    await resolveDynamicContent(viewModel);
 
     const html = await render('layout.ejs', { viewModel: viewModel } );
     res.writeHead(200, { 'Content-Type': 'text/html' });
