@@ -104,7 +104,9 @@ const server = http.createServer( async (req,res) => {
         res.end('404 Not Found');
     }catch(err){
         res.writeHead(500);
-        res.end('Error: ' + err.message);
+        res.end(`Error:......${err}
+Message:....${err.message}
+Stack:......${err.stack}`);
     }
 })
 
