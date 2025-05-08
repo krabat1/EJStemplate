@@ -1,5 +1,9 @@
 import path from 'path';
-import { pathToFileURL } from 'url';
+import fs from 'node:fs'
+import { pathToFileURL, fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export async function resolveDynamicContent(viewModel) {
     for (const [key, value] of Object.entries(viewModel.displayRules)) {
@@ -19,6 +23,19 @@ export async function resolveDynamicContent(viewModel) {
                             console.warn(`A(z) ${el} the module not export 'getHtml' function.`);
                             viewModel.displayRules[key][i] = '<!-- Error: needed getHtml() -->';
                         }
+                        // We push the component's public css paths into the headcsslinks property
+                        let relativePath = path.dirname(
+                            path.relative(
+                                path.join(__dirname,'..'), fileURLToPath(resolvedPath)
+                            )
+                        )
+                        const dirContent = fs.readdirSync(relativePath, { withFileTypes: true })
+                        for( const item of dirContent){
+                            if('.css'.includes(path.extname(item.name))){
+                                const cssPath = (path.join('css/',item.parentPath,item.name))
+                                viewModel.displayRules.headCssLinks.push(cssPath)
+                            }
+                        }
                     }
                 }
             }else if(
@@ -33,6 +50,19 @@ export async function resolveDynamicContent(viewModel) {
                 } else {
                     console.warn(`A(z) ${value[0]} the module not export 'getHtml' function.`);
                     viewModel.displayRules[key] = '<!-- Error: needed getHtml() -->';
+                }
+                // We push the component's public css paths into the headcsslinks property
+                let relativePath = path.dirname(
+                    path.relative(
+                        path.join(__dirname,'..'), fileURLToPath(resolvedPath)
+                    )
+                )
+                const dirContent = fs.readdirSync(relativePath, { withFileTypes: true })
+                for( const item of dirContent){
+                    if('.css'.includes(path.extname(item.name))){
+                        const cssPath = (path.join('css/',item.parentPath,item.name))
+                        viewModel.displayRules.headCssLinks.push(cssPath)
+                    }
                 }
             }
         }

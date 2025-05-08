@@ -22,11 +22,11 @@ const render = async (templateName, data = {}) => {
             if(Array.isArray(data.viewModel.displayRules[key])){
                 data.viewModel.displayRules.key = data.viewModel.displayRules[key].join('')
             }
-        }else if(key.match(/^c(\d+)_style$/)){
+        }/*else if(key.match(/^c(\d+)_style$/)){
             if(data.viewModel.displayRules[key] !== null){
                 data.viewModel.displayRules.headCssLinks.push(data.viewModel.displayRules[key]);
             } 
-        }
+        }*/
     })
     data.viewModel.displayRules.headCssLinks = data.viewModel.displayRules.headCssLinks.flat(Infinity);
     // add timestamp to css url
@@ -66,13 +66,6 @@ function createBaseViewModel() {
         c31_content: null,
         c32_content: null,
         c33_content: null,
-        c11_style: null,
-        c13_style: null,
-        c21_style: null,
-        c23_style: null,
-        c31_style: null,
-        c32_style: null,
-        c33_style: null,
         headCssLinks: []
         }
     };
@@ -122,7 +115,6 @@ async function handlerHome(req, res, match) {
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',
         c32_content: '<p>c32_content from viewModel</p>',
-        c11_style: 'css/components/test.css',
         testString: 'apple theft',
     });
 
