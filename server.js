@@ -66,6 +66,13 @@ function createBaseViewModel() {
         c31_content: null,
         c32_content: null,
         c33_content: null,
+        c11_ejsData:{},
+        c13_ejsData:{},
+        c21_ejsData:{},
+        c23_ejsData:{},
+        c31_ejsData:{},
+        c32_ejsData:{},
+        c33_ejsData:{},
         headCssLinks: []
         }
     };
@@ -115,7 +122,9 @@ async function handlerHome(req, res, match) {
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',
         c32_content: '<p>c32_content from viewModel</p>',
-        testString: 'apple theft',
+        c11_ejsData:{
+            testString: 'apple theft',
+        },
     });
 
     await resolveDynamicContent(viewModel);

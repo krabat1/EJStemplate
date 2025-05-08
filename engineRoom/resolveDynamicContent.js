@@ -5,12 +5,12 @@ import { pathToFileURL, fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function processComponent(scriptPath, viewModel, key, index = null) {
+async function processComponent(scriptPath, viewModel, key, index = null, partialData) {
     const resolvedPath = pathToFileURL(path.resolve(scriptPath)).href;
     const module = await import(resolvedPath);
 
     if (typeof module.getHtml === 'function') {
-        const html = await module.getHtml(viewModel);
+        const html = await module.getHtml(viewModel,partialData);
         if (index !== null) {
             viewModel.displayRules[key][index] = html;
         } else {
@@ -43,14 +43,18 @@ async function processComponent(scriptPath, viewModel, key, index = null) {
 export async function resolveDynamicContent(viewModel) {
     for (const [key, value] of Object.entries(viewModel.displayRules)) {
         if (key.endsWith('_content')) {
+            const regex = /(c\d+)(_content)/;
+            const found = key.match(regex);
+            const partialData = `${found[1]}_ejsData`
+
             if (Array.isArray(value)) {
                 for (let i = 0; i < value.length; i++) {
                     if (typeof value[i] === 'string' && value[i].endsWith('.js')) {
-                        await processComponent(value[i], viewModel, key, i);
+                        await processComponent(value[i], viewModel, key, i, partialData);
                     }
                 }
             } else if (typeof value === 'string' && value.endsWith('.js')) {
-                await processComponent(value, viewModel, key);
+                await processComponent(value, viewModel, key, partialData);
             }
         }
     }
