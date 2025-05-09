@@ -1,1 +1,6 @@
-.c11 > p:nth-child(2){color: red}
+.c11 > p:nth-child(2) {
+  color: blue;
+}
+.c11 > p:nth-child(2) span {
+  color: red;
+}

@@ -26,15 +26,23 @@ async function processComponent(scriptPath, viewModel, key, index = null, partia
         }
     }
 
-    // CSS fájlok gyűjtése
+    // collect CSS files for headCssLinks 
     const relativePath = path.dirname(
         path.relative(path.join(__dirname, '..'), fileURLToPath(resolvedPath))
     );
     const dirContent = fs.readdirSync(relativePath, { withFileTypes: true });
 
     for (const item of dirContent) {
-        if (item.isFile() && path.extname(item.name) === '.css') {
+        if (!item.isFile()) continue;
+        
+        const ext = path.extname(item.name)
+
+        if (ext === '.css') {
             const cssPath = path.join('css', relativePath, item.name).replace(/\\/g, '/');
+            viewModel.displayRules.headCssLinks.push(cssPath);
+        } else if (ext === '.scss' || ext === '.sass') {
+            const cssFileName = item.name.replace(/\.(scss|sass)$/, '.css');
+            const cssPath = path.join('css', relativePath, cssFileName).replace(/\\/g, '/');
             viewModel.displayRules.headCssLinks.push(cssPath);
         }
     }
