@@ -82,7 +82,7 @@ const server = http.createServer( async (req,res) => {
     try{
         const url = new URL(req.url, 'http://localhost'); // fontos: base URL kell
         const pathname = url.pathname; // ez csak az útvonalat adja: "/css/components/test.css"
-        const staticFilePath = path.join(__dirname, 'public', pathname);
+        const staticFilePath = path.join(__dirname, '..', 'public', pathname);
         //const staticFilePath = path.join(__dirname, 'public', req.url);
 
         if (fs.existsSync(staticFilePath) && fs.statSync(staticFilePath).isFile()) {
@@ -117,7 +117,7 @@ async function handlerHome(req, res, match) {
         c2: [true, true],
         c3: [false, true],
         // used partials: c11,c21,c23,c33,c32 (c32 always)
-        c11_content: ['components/testComponent/test.js'],
+        c11_content: ['testComponent/test.js'],
         c21_content: '<p>c21_content from viewModel</p>',
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',

@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
+  "imports": {
+    "#criticalPaths": "./criticalPaths.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --inspect server.js"
+    "start": "node --inspect src/server.js"
   },
   "keywords": [],
   "author": "",

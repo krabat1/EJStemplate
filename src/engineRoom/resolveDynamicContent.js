@@ -1,12 +1,15 @@
 import path from 'path';
-import fs from 'node:fs'
+import fs from 'node:fs';
 import { pathToFileURL, fileURLToPath } from 'url';
+import { componentsDir, srcDir } from '#criticalPaths';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function processComponent(scriptPath, viewModel, key, index = null, partialData) {
-    const resolvedPath = pathToFileURL(path.resolve(scriptPath)).href;
+    //const resolvedPath = pathToFileURL(path.resolve(scriptPath)).href;
+    const resolvedPath = pathToFileURL(path.join(componentsDir, scriptPath)).href;
     const module = await import(resolvedPath);
 
     if (typeof module.getHtml === 'function') {
@@ -27,18 +30,19 @@ async function processComponent(scriptPath, viewModel, key, index = null, partia
     }
 
     // collect CSS files for headCssLinks 
-    const relativePath = path.dirname(
-        path.relative(path.join(__dirname, '..'), fileURLToPath(resolvedPath))
+    let relativePath = path.dirname(
+        path.relative(srcDir, fileURLToPath(resolvedPath))
     );
+    relativePath = path.join('css', relativePath)
+
     const dirContent = fs.readdirSync(relativePath, { withFileTypes: true });
 
     for (const item of dirContent) {
         if (!item.isFile()) continue;
         
         const ext = path.extname(item.name)
-
         if (ext === '.css') {
-            const cssPath = path.join('css', relativePath, item.name).replace(/\\/g, '/');
+            const cssPath = path.join( relativePath, item.name).replace(/\\/g, '/');
             viewModel.displayRules.headCssLinks.push(cssPath);
         } else if (ext === '.scss' || ext === '.sass') {
             const cssFileName = item.name.replace(/\.(scss|sass)$/, '.css');
