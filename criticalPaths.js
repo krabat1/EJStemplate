@@ -10,7 +10,11 @@ const srcDir =           path.join(rootDir, 'src');
 const publicDir =        path.join(rootDir, 'public');
 const componentsDir =    path.join(srcDir, 'components');
 const viewsDir =         path.join(srcDir, 'views');
-const cssComponentsDir = path.join(rootDir, 'css', 'components'); // * skip public
+
+/**
+ * the public folder not displaying in the url
+ */
+const cssComponentsDir = path.join(rootDir, 'css', 'components'); 
 
 export {
   rootDir,
