@@ -28,13 +28,17 @@ const handlerHome = {
         c3: [false, true],
         // used partials: c11,c21,c23,c33,c32 (c32 always)
         c11_content: ['testComponent/test.js'],
-        c21_content: '<p>c21_content from viewModel</p>',
+        c21_content: '<p>c21_content ejstest: <%= ejstest %>+<%= ejstestb %></p>',
         c23_content: '<p>c23_content from viewModel</p>',
         c33_content: '<p>c33_content from viewModel</p>',
         c32_content: '<p>c32_content from viewModel</p>',
         c11_ejsData:[{
             testString: 'apple theft',
-        },]
+        },],
+        c21_ejsData:{
+            ejstest: 'apple theft',
+            ejstestb: 'apple theft_b',
+        },
     }
 }
 

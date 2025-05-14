@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'node:fs';
 import { pathToFileURL, fileURLToPath } from 'url';
 import { componentsDir, srcDir } from '#criticalPaths';
+import ejs from 'ejs';
 
 //const __filename = fileURLToPath(import.meta.url);
 //const __dirname = path.dirname(__filename);
@@ -19,6 +20,59 @@ import { componentsDir, srcDir } from '#criticalPaths';
  * It replaces the value of the viewModel _content property 
  * with the received data.
  * 
+ * @param {string} scriptPath the value of a _content property of the viewModel, 
+ * the path to the component
+ * @param {Object} viewModel 
+ * @param {string} key the property key for scriptPath
+ * @param {number} index when the viewModel stores multiple paths as an array, 
+ * the index containing the scriptPath
+ * @param {string} ejsDataKey a string that represents a key in the viewModel, 
+ * the associated value of which is the object to be passed to the 
+ * component with the data to be rendered.
+ */
+export async function processComponent(scriptPath, viewModel, key, index = null, ejsDataKey) {
+    const resolvedPath = pathToFileURL(path.join(componentsDir, scriptPath)).href;
+
+    try {
+        const module = await import(resolvedPath);
+
+        if (typeof module.getHtml === 'function') {
+            const html = await module.getHtml(viewModel, ejsDataKey, index);
+            if (index !== null) {
+                viewModel.displayRules[key][index] = html;
+            } else {
+                viewModel.displayRules[key] = html;
+            }
+        } else {
+            console.warn(`⚠️ A(z) "${scriptPath}" modul nem exportál getHtml() függvényt.`);
+            setFallbackHtml(viewModel, key, index);
+        }
+
+        collectCssLinks(resolvedPath, viewModel.displayRules.headCssLinks);
+    } catch (err) {
+        console.error(`❌ Hiba a komponens importálása közben (${scriptPath}):`, err);
+        setFallbackHtml(viewModel, key, index);
+    }
+}
+
+/**
+ * Gives a message if the component is missing the getHtml() method.
+ * 
+ * @param {Object} viewModel 
+ * @param {string} key the property key for scriptPath
+ * @param {number} index - when the viewModel stores multiple paths as an array, 
+ * the index containing the scriptPath
+ */
+function setFallbackHtml(viewModel, key, index) {
+    const fallback = '<!-- Error: needed getHtml() -->';
+    if (index !== null) {
+        viewModel.displayRules[key][index] = fallback;
+    } else {
+        viewModel.displayRules[key] = fallback;
+    }
+}
+
+/**
  * II. Collecting .css urls for the <head> tag
  * The path.relative() method calculates the relative path from
  * srcDir to resolvedPath based on the absolute paths, using dirname()
@@ -34,62 +88,28 @@ import { componentsDir, srcDir } from '#criticalPaths';
  * Pushes the link into the viewModel's headCssLinks property, 
  * which is an array.
  * 
- * @param {string} scriptPath the value of a _content property of the viewModel, 
- * the path to the component
- * @param {Object} viewModel 
- * @param {string} key the property key for scriptPath
- * @param {number} index if the viewModel stores multiple paths as an array, 
- * the index containing the scriptPath
- * @param {string} ejsDataKey a string that represents a key in the viewModel, 
- * the associated value of which is the object to be passed to the 
- * component with the data to be rendered.
+ * @param {*} resolvedPath - the absolute path of the component
+ * @param {string[]} headCssLinks - property of the viewModel to 
+ * store css links for <head> tag
  */
-async function processComponent(scriptPath, viewModel, key, index = null, ejsDataKey) {
-    /*console.log('scriptPath', scriptPath)
-    //console.log('viewModel',viewModel)
-    console.log('key',key)
-    console.log('index',index)
-    console.log('ejsDataKey-rdc.js',ejsDataKey)*/
-    //const resolvedPath = pathToFileURL(path.resolve(scriptPath)).href;
-    const resolvedPath = pathToFileURL(path.join(componentsDir, scriptPath)).href;
-    const module = await import(resolvedPath);
-
-    if (typeof module.getHtml === 'function') {
-        const html = await module.getHtml(viewModel,ejsDataKey,index);
-        if (index !== null) {
-            viewModel.displayRules[key][index] = html;
-        } else {
-            viewModel.displayRules[key] = html;
-        }
-    } else {
-        console.warn(`The ${scriptPath} module not export 'getHtml' function.`);
-        const fallback = '<!-- Error: needed getHtml() -->';
-        if (index !== null) {
-            viewModel.displayRules[key][index] = fallback;
-        } else {
-            viewModel.displayRules[key] = fallback;
-        }
-    }
-
-    // collect CSS files for headCssLinks 
-    let relativePath = path.dirname(
-        path.relative(srcDir, fileURLToPath(resolvedPath))
-    );
-    relativePath = path.join('css', relativePath)
-
-    const dirContent = fs.readdirSync(relativePath, { withFileTypes: true });
+function collectCssLinks(resolvedPath, headCssLinks) {
+    let relativePath = path.dirname(path.relative(srcDir, fileURLToPath(resolvedPath)));
+    const cssDir = path.join('css', relativePath);
+    const dirContent = fs.existsSync(cssDir)
+        ? fs.readdirSync(cssDir, { withFileTypes: true })
+        : [];
 
     for (const item of dirContent) {
         if (!item.isFile()) continue;
-        
-        const ext = path.extname(item.name)
+
+        const ext = path.extname(item.name).toLowerCase();
         if (ext === '.css') {
-            const cssPath = path.join( relativePath, item.name).replace(/\\/g, '/');
-            viewModel.displayRules.headCssLinks.push(cssPath);
+            const cssPath = path.join(cssDir, item.name).replace(/\\/g, '/');
+            headCssLinks.push(cssPath);
         } else if (ext === '.scss' || ext === '.sass') {
-            const cssFileName = item.name.replace(/\.(scss|sass)$/, '.css');
-            const cssPath = path.join('css', relativePath, cssFileName).replace(/\\/g, '/');
-            viewModel.displayRules.headCssLinks.push(cssPath);
+            const cssName = item.name.replace(/\.(scss|sass)$/, '.css');
+            const cssPath = path.join('css', relativePath, cssName).replace(/\\/g, '/');
+            headCssLinks.push(cssPath);
         }
     }
 }
@@ -108,19 +128,34 @@ async function processComponent(scriptPath, viewModel, key, index = null, ejsDat
  */
 export async function resolveDynamicContent(viewModel) {
     for (const [key, value] of Object.entries(viewModel.displayRules)) {
-        if (key.endsWith('_content')) {
-            const regex = /(c\d+)(_content)/;
-            const found = key.match(regex);
-            const ejsDataKey = `${found[1]}_ejsData`
-
-            if (Array.isArray(value)) {
-                for (let i = 0; i < value.length; i++) {
-                    if (typeof value[i] === 'string' && value[i].endsWith('.js')) {
-                        await processComponent(value[i], viewModel, key, i, ejsDataKey);
-                    }
-                }
-            } else if (typeof value === 'string' && value.endsWith('.js')) {
+        if (!key.endsWith('_content')) continue;
+    
+        const match = key.match(/(c\d+)_content/);
+        if (!match) continue;
+    
+        const prefix = match[1];
+        const ejsDataKey = `${prefix}_ejsData`;
+        const ejsData = viewModel.displayRules[ejsDataKey] ?? {};
+    
+        if (Array.isArray(value)) {
+          // Tömb: komponensek tömbje
+          for (let i = 0; i < value.length; i++) {
+            if (typeof value[i] === 'string' && value[i].endsWith('.js')) {
+              await processComponent(value[i], viewModel, key, i, ejsDataKey);
+            }
+          }
+        } else if (typeof value === 'string') {
+            if (value.endsWith('.js')) {
+                // Egyetlen komponens JS fájl
                 await processComponent(value, viewModel, key, ejsDataKey);
+            } else if (value.includes('<%')) {
+                // EJS scriptlet kifejezések (pl. <%= ... %>, <% if (...) { %> stb.)
+                try {
+                    viewModel.displayRules[key] = ejs.render(value, ejsData);
+                } catch (err) {
+                    console.warn(`⚠️ Hiba történt a "${key}" renderelése közben: ${err.message}`);
+                    viewModel.displayRules[key] = `<p style="color:red;">EJS render error: ${err.message}</p>`;
+                }
             }
         }
     }
